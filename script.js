@@ -1,16 +1,23 @@
+$(document).ready(function () {
 var hours = [9, 10, 11, 12, 1, 2, 3, 4, 5];
 var hourdiv = $("#hourdiv");
 var currentDateEl = $("#currentdate");
-var savedEvents = $()
+var savedEvents = [];
+
 
 function createHourElements() {
     for (var i = 0; i < hours.length; i++) {
+        var outerdivEl = $("<div>");
         var divEl = $("<form>");
         var innerEl = $("<div>");
         var spanEl = $("<span>");
         var inputEl = $("<input>");
         var buttonDivEl = $("<div>");
         var buttonEl = $("<button>");
+        outerdivEl.attr({
+            id: hours.indexOf(hours[i]) + 9,
+            class: "hours"
+        });
         divEl.attr({
             class: "input-group mb-3",
             "data-index": hours[i],
@@ -52,20 +59,44 @@ function createHourElements() {
         divEl.append(inputEl);
         buttonDivEl.append(buttonEl);
         divEl.append(buttonDivEl);
-        hourdiv.append(divEl);
+        outerdivEl.append(divEl);
+        hourdiv.append(outerdivEl);
     }
 }
+
+
 function currentDateElement() {
     currentDateEl.text(moment().format('MMMM Do YYYY'));
 }
 
+function renderEvents() {
+    var nodeList = $(".hours");
+    $( ".schedule" ).remove();
+    for (let z = 0; z < savedEvents.length; z++) {
+        for (let i = 0; i < nodeList.length; i++){
+        if (savedEvents[z].index === nodeList[i].id){
+            // var eventDiv = $("<div>");
+            // eventDiv.text(savedEvents[z].event);
+            $(nodeList[i]).append(`<div class="schedule">${savedEvents[z].event}</div>`);
+        }      
+      }
+}
+};
 
 
 function init() {
+
+    var storedEvents = JSON.parse(localStorage.getItem("savedEvents"));
+    
+  // If todos were retrieved from localStorage, update the todos array to it
+  if (storedEvents !== null) {
+    savedEvents = storedEvents;
+    console.log(savedEvents);
+  }
     currentDateElement();
     createHourElements();
+    renderEvents();
 }
-
 
 init();
 
@@ -73,16 +104,22 @@ $("form").on("click", function(event) {
     // Preventing the button from trying to submit the form
     event.preventDefault();
     var target = $(event.target);
-    if (target.is("button")) {
+    if (target.is("#updatebutton")) {
         var update = $(this).find("#eventInput").val().trim();
+        if (update !== "") {
         var hourIndex = $(this).attr("data-index");
-        var savedEvents = {
+        var savedEvent = {
             index: hourIndex,
             event: update
         }
+        savedEvents.push(savedEvent);
         localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
+        renderEvents();
+        $(this).find("#eventInput").val('');
+    }
     }
     else {
         return;
     }
+});
 });
