@@ -15,6 +15,11 @@ function createHourElements() {
         var inputEl = $("<input>");
         var buttonDivEl = $("<div>");
         var buttonEl = $("<button>");
+        var eventEl = $("<div>");
+        eventEl.attr({
+            class: "event-hours list-group",
+            'data-index': hours[i]
+        });
         outerdivEl.attr({
             id: hours.indexOf(hours[i]) + 9,
             class: "hours"
@@ -61,7 +66,9 @@ function createHourElements() {
         buttonDivEl.append(buttonEl);
         divEl.append(buttonDivEl);
         outerdivEl.append(divEl);
+        outerdivEl.append(eventEl);
         hourdiv.append(outerdivEl);
+
     }
 }
 
@@ -72,16 +79,17 @@ function currentDateElement() {
 }
 
 function renderEvents() {
-    //creating a collection variable of our hours nodelist
-    var nodeList = $(".hours");
+    //creating a collection variable of our event-hours nodelist
+    var nodeList = $(".event-hours");
     //removing rendered events to avoid duplication
     $( ".schedule" ).remove();
     //looping through our savedEvents array captured from localStorage and our nodelist collection to compare values
     for (let z = 0; z < savedEvents.length; z++) {
         for (let i = 0; i < nodeList.length; i++){
-        if (savedEvents[z].index === nodeList[i].id){
+            console.log(nodeList[i].getAttribute('data-index'));
+        if (savedEvents[z].index === nodeList[i].getAttribute('data-index')){
             //appending a new event div for each localStorage event to our matching nodeList div
-            $(nodeList[i]).append(`<div class="schedule">${savedEvents[z].event}</div>`);
+            $(nodeList[i]).append(`<button type="button" class="schedule list-group-item-action">${savedEvents[z].event}</button>`);
         }      
       }
 }
@@ -131,4 +139,33 @@ $("form").on("click", function(event) {
         return;
     }
 });
+
+
+$('body').on("click", function(event) {
+    event.preventDefault();
+    var target = $(event.target);
+    if (target.is('.schedule')) {
+        var storedEvents = JSON.parse(localStorage.getItem("savedEvents"));
+        var storageText = target.text();
+        var storageKey = target.parent().attr('data-index');
+        console.log(storageText);
+        console.log(storageKey);
+        console.log(storedEvents);
+        for (let i = 0; i < storedEvents.length; i++) {
+            if (storedEvents[i].event === storageText && storageKey === storedEvents[i].index) {
+                storedEvents.splice(i, 1);
+                console.log(storedEvents);
+            }
+        }
+        localStorage.setItem("savedEvents", JSON.stringify(storedEvents));
+        savedEvents = storedEvents;
+        renderEvents();
+    }
+    else {
+        return;
+    }
+
+    // savedEvents.
+});
+
 });
