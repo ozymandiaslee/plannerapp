@@ -6,6 +6,7 @@ var savedEvents = [];
 
 
 function createHourElements() {
+    //loop through the hours array and create DOM elements for corresponding hours
     for (var i = 0; i < hours.length; i++) {
         var outerdivEl = $("<div>");
         var divEl = $("<form>");
@@ -66,17 +67,20 @@ function createHourElements() {
 
 
 function currentDateElement() {
+    //capturing current date using moment and printing to our current date element
     currentDateEl.text(moment().format('MMMM Do YYYY'));
 }
 
 function renderEvents() {
+    //creating a collection variable of our hours nodelist
     var nodeList = $(".hours");
+    //removing rendered events to avoid duplication
     $( ".schedule" ).remove();
+    //looping through our savedEvents array captured from localStorage and our nodelist collection to compare values
     for (let z = 0; z < savedEvents.length; z++) {
         for (let i = 0; i < nodeList.length; i++){
         if (savedEvents[z].index === nodeList[i].id){
-            // var eventDiv = $("<div>");
-            // eventDiv.text(savedEvents[z].event);
+            //appending a new event div for each localStorage event to our matching nodeList div
             $(nodeList[i]).append(`<div class="schedule">${savedEvents[z].event}</div>`);
         }      
       }
@@ -86,22 +90,25 @@ function renderEvents() {
 
 function init() {
 
+    //reassigning our storedEvents global variable to our localStorage savedEvents
     var storedEvents = JSON.parse(localStorage.getItem("savedEvents"));
     
-  // If todos were retrieved from localStorage, update the todos array to it
   if (storedEvents !== null) {
     savedEvents = storedEvents;
     console.log(savedEvents);
   }
+  //running our other init functions
     currentDateElement();
     createHourElements();
     renderEvents();
 }
 
+//running init
 init();
 
+//event handler for saving events to localStorage
 $("form").on("click", function(event) {
-    // Preventing the button from trying to submit the form
+    // prevent the button from trying to submit the form
     event.preventDefault();
     var target = $(event.target);
     if (target.is("#updatebutton")) {
@@ -114,7 +121,9 @@ $("form").on("click", function(event) {
         }
         savedEvents.push(savedEvent);
         localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
+        //rerendering the events using the updated array
         renderEvents();
+        //clear the input field
         $(this).find("#eventInput").val('');
     }
     }
